@@ -1,0 +1,6 @@
+{
+  "name": "Dashboard Financeiro",
+  "description": "Dashboard financeiro completo contendo resumo do mês, alertas críticos, recebíveis por categoria, fila NIBO, tabela financeira geral, contratos de êxito, acordos e parcelamentos, relatórios, exportações e logs de conferência.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
