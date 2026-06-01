@@ -26,6 +26,7 @@ import SuccessContracts from './components/SuccessContracts';
 import AgreementsInstallments from './components/AgreementsInstallments';
 import ReportsExports from './components/ReportsExports';
 import ConferenceLogs from './components/ConferenceLogs';
+import ContractRegistration from './components/ContractRegistration';
 
 // Icons
 import { 
@@ -45,7 +46,8 @@ import {
   Clock,
   ArrowUpRight,
   TrendingUp,
-  LayoutDashboard
+  LayoutDashboard,
+  Plus
 } from 'lucide-react';
 
 export default function App() {
@@ -59,6 +61,7 @@ export default function App() {
 
   // Quick State Filters / Active Anchor
   const [activeSection, setActiveSection] = useState<string>('Overview');
+  const [view, setView] = useState<'dashboard' | 'cadastro-contrato'>('dashboard');
 
   // Logs append helper
   const addTimelineLog = (action: string, status: ConferenceLog['status'] = 'info') => {
@@ -309,10 +312,13 @@ export default function App() {
 
   // Direct scrolls to anchor elements
   const scrollToSection = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    setView('dashboard');
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 40);
   };
 
   return (
@@ -375,6 +381,19 @@ export default function App() {
             {/* Anchor button listing */}
             <nav className="flex flex-col gap-1 text-xs">
               
+              {/* Giffoni BOSS: Contract Registration */}
+              <button 
+                onClick={() => { setView('cadastro-contrato'); setActiveSection('giffoni-cadastro'); }}
+                className={`w-full text-left p-1.5 rounded text-[11px] font-bold transition-all flex items-center justify-between border ${
+                  activeSection === 'giffoni-cadastro' && view === 'cadastro-contrato'
+                    ? 'bg-amber-500 text-slate-950 border-amber-600 font-extrabold shadow-sm' 
+                    : 'text-amber-400 border border-amber-500/15 hover:bg-slate-800'
+                }`}
+              >
+                <span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5 shrink-0" /> CONTRATO FINANCEIRO</span>
+                <ChevronRight className="w-3 h-3 opacity-60 animate-pulse" />
+              </button>
+
               {/* Module 1: Resumo */}
               <button 
                 onClick={() => { setActiveSection('resumo'); scrollToSection('section-resumo'); }}
@@ -519,25 +538,50 @@ export default function App() {
 
         {/* Right workspace displaying the modules sequence */}
         <main className="flex-1 flex flex-col gap-4">
-          
-          {/* Welcome Dashboard Banner banner */}
-          <div className="p-4 bg-white text-slate-800 rounded border border-gray-200 shadow-sm relative overflow-hidden">
-            <div className="absolute right-0 top-0 bottom-0 p-8 opacity-5 flex items-center">
-              <Building2 className="w-32 h-32 text-slate-800" />
-            </div>
-            <div className="relative z-10">
-              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
-                <span className="w-2 h-2 rounded-full bg-blue-500"></span> Console de Controladoria Operacional de Êxito
-              </h2>
-              <p className="text-xs text-slate-600 max-w-2xl mt-1 leading-normal font-sans">
-                Este console de controladoria possibilita auditar receitas advocatícias, contratos de êxito judicial, planos de amortização/acordos, sincronizar pendências com a Fila Nibo, e auditar conformidade de conciliação diária de caixa. 
-                Utilizando uma visualização compacta, com espaçamento denso e visualização de alta densidade de dados.
-              </p>
-            </div>
-          </div>
+          {view === 'cadastro-contrato' ? (
+            <ContractRegistration 
+              onBackToDashboard={() => {
+                setView('dashboard');
+                setActiveSection('Overview');
+              }}
+              onLogAction={addTimelineLog}
+            />
+          ) : (
+            <>
+              {/* Welcome Dashboard Banner banner */}
+              <div className="p-4 bg-white text-slate-800 rounded border border-gray-200 shadow-sm relative overflow-hidden font-sans">
+                <div className="absolute right-0 top-0 bottom-0 p-8 opacity-5 flex items-center">
+                  <Building2 className="w-32 h-32 text-slate-800" />
+                </div>
+                <div className="relative z-10">
+                  <h2 className="text-sm font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
+                    <span className="w-2 h-2 rounded-full bg-blue-500"></span> Console de Controladoria Operacional de Êxito
+                  </h2>
+                  <p className="text-xs text-slate-600 max-w-2xl mt-1 leading-normal">
+                    Este console de controladoria possibilita auditar receitas advocatícias, contratos de êxito judicial, planos de amortização/acordos, sincronizar pendências com a Fila Nibo, e auditar conformidade de conciliação diária de caixa. 
+                    Utilizando uma visualização compacta, com espaçamento denso e visualização de alta densidade de dados.
+                  </p>
+                  
+                  {/* Giffoni BOSS Contract Admittance CTA */}
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <button 
+                      onClick={() => { setView('cadastro-contrato'); setActiveSection('giffoni-cadastro'); }}
+                      className="flex items-center gap-1.5 text-[10px] font-black px-3.5 py-2 bg-amber-500 hover:bg-amber-600 border border-amber-600 text-slate-950 rounded transition-all duration-150 uppercase tracking-wider shadow-xs animate-pulse font-bold"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-slate-950" /> Novo Cadastro Contrato Financeiro (Giffoni BOSS)
+                    </button>
+                    <button 
+                      onClick={() => { setActiveSection('contratos'); scrollToSection('section-contratos'); }}
+                      className="flex items-center gap-1 text-[10px] font-bold px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-250 text-slate-700 rounded transition-colors uppercase tracking-wider font-bold"
+                    >
+                      Consultar Carteira Ativa
+                    </button>
+                  </div>
+                </div>
+              </div>
 
-          {/* MODULE 1: Resumo do Mês */}
-          <MonthlySummary transactions={transactions} />
+              {/* MODULE 1: Resumo do Mês */}
+              <MonthlySummary transactions={transactions} />
 
           {/* MODULE 2: Alertas Críticos */}
           <CriticalAlerts 
@@ -595,7 +639,9 @@ export default function App() {
             onClearLogs={handleClearLogs}
           />
 
-        </main>
+        </>
+      )}
+    </main>
 
       </div>
 
