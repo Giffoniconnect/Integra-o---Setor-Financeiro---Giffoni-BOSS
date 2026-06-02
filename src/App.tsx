@@ -17,16 +17,18 @@ import {
 } from './data';
 
 // Components
-import MonthlySummary from './components/MonthlySummary';
-import CriticalAlerts from './components/CriticalAlerts';
-import ReceivablesByCategory from './components/ReceivablesByCategory';
-import NiboQueue from './components/NiboQueue';
-import GeneralLedger from './components/GeneralLedger';
-import SuccessContracts from './components/SuccessContracts';
-import AgreementsInstallments from './components/AgreementsInstallments';
-import ReportsExports from './components/ReportsExports';
-import ConferenceLogs from './components/ConferenceLogs';
+import ModuloDashboard from './components/ModuloDashboard';
+import ModuloAlertasCriticos from './components/ModuloAlertasCriticos';
+import ModuloRecebiveisMes from './components/ModuloRecebiveisMes';
+import ModuloRecebidoMes from './components/ModuloRecebidoMes';
+import ModuloContratosAtivos from './components/ModuloContratosAtivos';
+import ModuloContratosInadimplentes from './components/ModuloContratosInadimplentes';
+import ModuloNibo from './components/ModuloNibo';
+import ModuloAcordosAtivos from './components/ModuloAcordosAtivos';
+import ModuloContratosExito from './components/ModuloContratosExito';
 import ContractRegistration from './components/ContractRegistration';
+import ConferenceLogs from './components/ConferenceLogs';
+import ModuloConfiguracoes from './components/ModuloConfiguracoes';
 
 // Icons
 import { 
@@ -47,7 +49,11 @@ import {
   ArrowUpRight,
   TrendingUp,
   LayoutDashboard,
-  Plus
+  Plus,
+  Briefcase,
+  AlertCircle,
+  Sparkles,
+  Settings
 } from 'lucide-react';
 
 export default function App() {
@@ -62,6 +68,42 @@ export default function App() {
   // Quick State Filters / Active Anchor
   const [activeSection, setActiveSection] = useState<string>('Overview');
   const [view, setView] = useState<'dashboard' | 'cadastro-contrato'>('dashboard');
+  
+  // Real Browser-integrated Router State for Deep Linking
+  const [currentPath, setCurrentPath] = useState<string>(() => {
+    const path = window.location.pathname;
+    if (path === '/' || path === '' || path === '/index.html') {
+      return '/financeiro';
+    }
+    return path;
+  });
+
+  const handleNavigate = (path: string) => {
+    setCurrentPath(path);
+    window.history.pushState(null, '', path);
+    addTimelineLog(`Navegou para a rota: ${path}`, 'info');
+  };
+
+  React.useEffect(() => {
+    const handlePopState = () => {
+      let pathname = window.location.pathname;
+      if (pathname === '/' || pathname === '' || pathname === '/index.html') {
+        pathname = '/financeiro';
+      }
+      setCurrentPath(pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    
+    // Initial path rewrite to guarantee alignment
+    let initialPath = window.location.pathname;
+    if (initialPath === '/' || initialPath === '' || initialPath === '/index.html') {
+      window.history.replaceState(null, '', '/financeiro');
+    }
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
 
   // Logs append helper
   const addTimelineLog = (action: string, status: ConferenceLog['status'] = 'info') => {
@@ -183,7 +225,7 @@ export default function App() {
     }
     else if (alertType === 'high_success_fee') {
       // Just focus on contract
-      scrollToSection('section-contratos');
+      handleNavigate('/financeiro/modulo-09-contratos-exito');
       addTimelineLog('Foco redirecionado para contratos de êxito.', 'info');
     }
   };
@@ -370,132 +412,150 @@ export default function App() {
       {/* Main Container Layout */}
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-4 flex-1 flex flex-col lg:flex-row gap-4">
         
-        {/* Compact Right Drawer Navigation Panel based on High Density Theme */}
-        <aside className="lg:w-56 shrink-0 flex flex-col gap-4 self-stretch">
+        {/* Compact Sidebar Navigation Panel based on High Density Theme */}
+        <aside className="lg:w-56 shrink-0 flex flex-col gap-4 self-stretch font-sans">
           
-          <div className="bg-[#1E293B] text-white rounded border border-slate-700/80 p-3 sticky top-16 shadow-sm">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-              <LayoutDashboard className="w-3 h-3 text-slate-400" /> ÍNDICE OPERACIONAL
+          <div className="bg-[#1E293B] text-white rounded border border-slate-705 p-3 sticky top-16 shadow-sm">
+            <h3 
+              onClick={() => handleNavigate('/financeiro')} 
+              className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5 flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors"
+            >
+              <LayoutDashboard className="w-3 h-3 text-slate-400" /> CENTRAL GESTÃO BOSS
             </h3>
 
-            {/* Anchor button listing */}
+            {/* Path Mapped Button List */}
             <nav className="flex flex-col gap-1 text-xs">
               
-              {/* Giffoni BOSS: Contract Registration */}
+              {/* Dashboard Principal link */}
               <button 
-                onClick={() => { setView('cadastro-contrato'); setActiveSection('giffoni-cadastro'); }}
+                onClick={() => handleNavigate('/financeiro')}
+                className={`w-full text-left p-1.5 rounded text-[11px] font-bold transition-all flex items-center justify-between ${
+                  currentPath === '/financeiro'
+                    ? 'bg-blue-600 text-white' 
+                    : 'text-slate-350 hover:bg-slate-805'
+                }`}
+              >
+                <span>🚀 Painel de Navegação</span>
+                <ChevronRight className="w-3 h-3 opacity-60" />
+              </button>
+
+              {/* Módulo 10: Criar Contrato */}
+              <button 
+                onClick={() => handleNavigate('/financeiro/modulo-10-cadastro-contrato')}
                 className={`w-full text-left p-1.5 rounded text-[11px] font-bold transition-all flex items-center justify-between border ${
-                  activeSection === 'giffoni-cadastro' && view === 'cadastro-contrato'
+                  currentPath === '/financeiro/modulo-10-cadastro-contrato'
                     ? 'bg-amber-500 text-slate-950 border-amber-600 font-extrabold shadow-sm' 
                     : 'text-amber-400 border border-amber-500/15 hover:bg-slate-800'
                 }`}
               >
-                <span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5 shrink-0" /> CONTRATO FINANCEIRO</span>
+                <span className="flex items-center gap-1.5"><Plus className="w-3.5 h-3.5 shrink-0" /> Criar Contrato (M10)</span>
                 <ChevronRight className="w-3 h-3 opacity-60 animate-pulse" />
               </button>
 
-              {/* Module 1: Resumo */}
+              {/* Módulo 02: Alertas */}
               <button 
-                onClick={() => { setActiveSection('resumo'); scrollToSection('section-resumo'); }}
-                className={`w-full text-left p-1.5 rounded text-[11px] font-medium transition-all flex items-center justify-between ${
-                  activeSection === 'resumo' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
-                }`}
-              >
-                <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 shrink-0" /> Resumo do Mês</span>
-                <ChevronRight className="w-3 h-3 opacity-60" />
-              </button>
-
-              {/* Module 2: Alertas */}
-              <button 
-                onClick={() => { setActiveSection('alertas'); scrollToSection('section-alertas'); }}
+                onClick={() => handleNavigate('/financeiro/modulo-02-alertas-criticos')}
                 className={`w-full text-left p-1.5 rounded text-[11px] font-medium transition-all flex items-center justify-between relative ${
-                  activeSection === 'alertas' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
+                  currentPath === '/financeiro/modulo-02-alertas-criticos' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
                 }`}
               >
                 <span className="flex items-center gap-1.5">
-                  <ShieldAlert className="w-3.5 h-3.5 shrink-0" /> Alertas Críticos
+                  <ShieldAlert className="w-3.5 h-3.5 shrink-0" /> Alertas Críticos (M2)
                 </span>
                 <span className="bg-rose-900/60 text-rose-300 px-1 py-0.2 text-[9px] font-mono font-bold rounded">
                   {alerts.filter(a => !a.dismissed).length}
                 </span>
               </button>
 
-              {/* Module 3: Recebíveis */}
+              {/* Módulo 03: Recebíveis */}
               <button 
-                onClick={() => { setActiveSection('recebiveis'); scrollToSection('section-recebiveis'); }}
+                onClick={() => handleNavigate('/financeiro/modulo-03-recebiveis-mes')}
                 className={`w-full text-left p-1.5 rounded text-[11px] font-medium transition-all flex items-center justify-between ${
-                  activeSection === 'recebiveis' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
+                  currentPath === '/financeiro/modulo-03-recebiveis-mes' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
                 }`}
               >
-                <span className="flex items-center gap-1.5"><PieChart className="w-3.5 h-3.5 shrink-0" /> Recebíveis Categoria</span>
+                <span className="flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5 shrink-0" /> Recebíveis do Mês (M3)</span>
                 <ChevronRight className="w-3 h-3 opacity-60" />
               </button>
 
-              {/* Module 4: Fila Nibo */}
+              {/* Módulo 04: Recebido */}
               <button 
-                onClick={() => { setActiveSection('nibo'); scrollToSection('section-nibo'); }}
+                onClick={() => handleNavigate('/financeiro/modulo-04-recebido-mes')}
                 className={`w-full text-left p-1.5 rounded text-[11px] font-medium transition-all flex items-center justify-between ${
-                  activeSection === 'nibo' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
+                  currentPath === '/financeiro/modulo-04-recebido-mes' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
                 }`}
               >
-                <span className="flex items-center gap-1.5"><Server className="w-3.5 h-3.5 shrink-0" /> Fila NIBO Sync</span>
+                <span className="flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 shrink-0" /> Recebido No Mês (M4)</span>
+                <ChevronRight className="w-3 h-3 opacity-60" />
+              </button>
+
+              {/* Módulo 05: Contratos Ativos */}
+              <button 
+                onClick={() => handleNavigate('/financeiro/modulo-05-contratos-ativos')}
+                className={`w-full text-left p-1.5 rounded text-[11px] font-medium transition-all flex items-center justify-between ${
+                  currentPath === '/financeiro/modulo-05-contratos-ativos' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <span className="flex items-center gap-1.5"><Briefcase className="w-3.5 h-3.5 shrink-0" /> Contratos Ativos (M5)</span>
+                <ChevronRight className="w-3 h-3 opacity-60" />
+              </button>
+
+              {/* Módulo 06: Inadimplências */}
+              <button 
+                onClick={() => handleNavigate('/financeiro/modulo-06-contratos-inadimplentes')}
+                className={`w-full text-left p-1.5 rounded text-[11px] font-medium transition-all flex items-center justify-between ${
+                  currentPath === '/financeiro/modulo-06-contratos-inadimplentes' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <span className="flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5 shrink-0" /> Inadimplência (M6)</span>
+                <ChevronRight className="w-3 h-3 opacity-60" />
+              </button>
+
+              {/* Módulo 07: NIBO */}
+              <button 
+                onClick={() => handleNavigate('/financeiro/modulo-07-nibo')}
+                className={`w-full text-left p-1.5 rounded text-[11px] font-medium transition-all flex items-center justify-between ${
+                  currentPath === '/financeiro/modulo-07-nibo' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <span className="flex items-center gap-1.5"><Server className="w-3.5 h-3.5 shrink-0" /> Fila NIBO Sync (M7)</span>
                 <span className="bg-blue-900/60 text-blue-300 px-1 py-0.2 text-[9px] font-mono font-bold rounded">
                   {niboQueue.filter(q => q.status === 'pending').length}
                 </span>
               </button>
 
-              {/* Module 5: Tabela */}
+              {/* Módulo 08: Acordos */}
               <button 
-                onClick={() => { setActiveSection('tabela'); scrollToSection('section-tabela'); }}
+                onClick={() => handleNavigate('/financeiro/modulo-08-acordos-ativos')}
                 className={`w-full text-left p-1.5 rounded text-[11px] font-medium transition-all flex items-center justify-between ${
-                  activeSection === 'tabela' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
+                  currentPath === '/financeiro/modulo-08-acordos-ativos' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
                 }`}
               >
-                <span className="flex items-center gap-1.5"><Layers className="w-3.5 h-3.5 shrink-0" /> Tabela Financeira</span>
+                <span className="flex items-center gap-1.5"><Coins className="w-3.5 h-3.5 shrink-0" /> Acordos Ativos (M8)</span>
                 <ChevronRight className="w-3 h-3 opacity-60" />
               </button>
 
-              {/* Module 6: Contratos */}
+              {/* Módulo 09: Êxito */}
               <button 
-                onClick={() => { setActiveSection('contratos'); scrollToSection('section-contratos'); }}
+                onClick={() => handleNavigate('/financeiro/modulo-09-contratos-exito')}
                 className={`w-full text-left p-1.5 rounded text-[11px] font-medium transition-all flex items-center justify-between ${
-                  activeSection === 'contratos' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
+                  currentPath === '/financeiro/modulo-09-contratos-exito' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
                 }`}
               >
-                <span className="flex items-center gap-1.5"><Scale className="w-3.5 h-3.5 shrink-0" /> Contratos de Êxito</span>
+                <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 shrink-0" /> Ad Exitum Êxito (M9)</span>
                 <ChevronRight className="w-3 h-3 opacity-60" />
               </button>
 
-              {/* Module 7: Acordos */}
+              {/* Configurações link */}
               <button 
-                onClick={() => { setActiveSection('acordos'); scrollToSection('section-acordos'); }}
-                className={`w-full text-left p-1.5 rounded text-[11px] font-medium transition-all flex items-center justify-between ${
-                  activeSection === 'acordos' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
+                onClick={() => handleNavigate('/financeiro/configuracoes')}
+                className={`w-full text-left p-1.5 rounded text-[11px] font-bold transition-all flex items-center justify-between ${
+                  currentPath === '/financeiro/configuracoes'
+                    ? 'bg-purple-600 text-white' 
+                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                 }`}
               >
-                <span className="flex items-center gap-1.5"><Coins className="w-3.5 h-3.5 shrink-0" /> Acordos / Parcelas</span>
-                <ChevronRight className="w-3 h-3 opacity-60" />
-              </button>
-
-              {/* Module 8: Relatorios */}
-              <button 
-                onClick={() => { setActiveSection('relatorios'); scrollToSection('section-relatorios'); }}
-                className={`w-full text-left p-1.5 rounded text-[11px] font-medium transition-all flex items-center justify-between ${
-                  activeSection === 'relatorios' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
-                }`}
-              >
-                <span className="flex items-center gap-1.5"><Download className="w-3.5 h-3.5 shrink-0" /> Relatórios Export</span>
-                <ChevronRight className="w-3 h-3 opacity-60" />
-              </button>
-
-              {/* Module 9: Logs */}
-              <button 
-                onClick={() => { setActiveSection('logs'); scrollToSection('section-logs'); }}
-                className={`w-full text-left p-1.5 rounded text-[11px] font-medium transition-all flex items-center justify-between ${
-                  activeSection === 'logs' ? 'bg-blue-600 text-white' : 'text-slate-350 hover:bg-slate-800 hover:text-white'
-                }`}
-              >
-                <span className="flex items-center gap-1.5"><Terminal className="w-3.5 h-3.5 shrink-0" /> Logs Auditoria</span>
+                <span className="flex items-center gap-1.5"><Settings className="w-3.5 h-3.5 shrink-0" /> Configurações (M11)</span>
                 <ChevronRight className="w-3 h-3 opacity-60" />
               </button>
 
@@ -503,7 +563,7 @@ export default function App() {
 
             {/* Quick real logs preview at the bottom of the sidebar */}
             <div className="mt-4 pt-3 border-t border-slate-700/60 text-[10px]">
-              <div className="uppercase text-slate-500 font-bold mb-1.5 tracking-wider px-1">Últimas Ações</div>
+              <div className="uppercase text-slate-500 font-bold mb-1.5 tracking-wider px-1">Últimas Ações (Logs)</div>
               <div className="space-y-1 font-mono text-slate-400">
                 {logs.slice(0, 3).map((item, idx) => (
                   <div key={item.id} className="truncate px-0.5" title={item.action}>
@@ -536,122 +596,154 @@ export default function App() {
 
         </aside>
 
-        {/* Right workspace displaying the modules sequence */}
-        <main className="flex-1 flex flex-col gap-4">
-          {view === 'cadastro-contrato' ? (
-            <ContractRegistration 
-              onBackToDashboard={() => {
-                setView('dashboard');
-                setActiveSection('Overview');
+        {/* Central specialized decentralized main view rendering framework */}
+        <main className="flex-1 flex flex-col gap-4 min-w-0">
+          
+          {/* Breadcrumbs for specialized sub-routes */}
+          {currentPath !== '/financeiro' && (
+            <div className="bg-white p-3 border border-slate-200 rounded-lg flex items-center justify-between text-xs text-slate-600">
+               <div className="flex items-center gap-1">
+                <span className="text-slate-400 hover:underline cursor-pointer font-bold" onClick={() => handleNavigate('/financeiro')}>Financeiro</span>
+                <span className="text-slate-400">&gt;</span>
+                <span className="font-mono font-bold text-slate-900 bg-slate-100 rounded px-1.5 py-0.5 uppercase">
+                  {currentPath.replace('/financeiro/', '').replace('-', ' ')}
+                </span>
+              </div>
+              <button
+                onClick={() => handleNavigate('/financeiro')}
+                className="text-[10px] font-mono bg-slate-900 hover:bg-slate-805 text-white px-2.5 py-1 rounded font-bold uppercase transition-all"
+              >
+                ← Voltar painel principal (/financeiro)
+              </button>
+            </div>
+          )}
+
+          {/* PATH DIVISION ROUTER */}
+          
+          {/* PATH 1: MÓDULO 01 (DASHBOARD) */}
+          {currentPath === '/financeiro' && (
+            <ModuloDashboard 
+              transactions={transactions}
+              niboQueue={niboQueue}
+              successContracts={successContracts}
+              agreements={agreements}
+              alerts={alerts}
+              onNavigate={handleNavigate}
+            />
+          )}
+
+          {/* PATH 2: MÓDULO 02 (CRITICAL ALERTS) */}
+          {currentPath === '/financeiro/modulo-02-alertas-criticos' && (
+            <ModuloAlertasCriticos 
+              alerts={alerts}
+              transactions={transactions}
+              agreements={agreements}
+              niboQueue={niboQueue}
+              onDismiss={handleDismissAlert}
+              onResolveAlert={handleResolveAlert}
+              onUpdateTransactionStatus={handleUpdateTransactionStatus}
+              onUploadReceipt={(txId, name) => {
+                addTimelineLog(`Comprovante "${name}" anexado de imediato à transação ${txId}.`, 'success');
               }}
+            />
+          )}
+
+          {/* PATH 3: MÓDULO 03 (RECEIVABLES FORECAST) */}
+          {currentPath === '/financeiro/modulo-03-recebiveis-mes' && (
+            <ModuloRecebiveisMes 
+              transactions={transactions}
+              agreements={agreements}
+              successContracts={successContracts}
+            />
+          )}
+
+          {/* PATH 4: MÓDULO 04 (RECEIVADOS CAIXA) */}
+          {currentPath === '/financeiro/modulo-04-recebido-mes' && (
+            <ModuloRecebidoMes 
+              transactions={transactions}
+              onUpdateStatus={handleUpdateTransactionStatus}
+            />
+          )}
+
+          {/* PATH 5: MÓDULO 05 (ACTIVE CONTRACTS) */}
+          {currentPath === '/financeiro/modulo-05-contratos-ativos' && (
+            <ModuloContratosAtivos 
+              contracts={successContracts}
+              onAddContract={handleAddSuccessContract}
+              onUpdateStatus={handleUpdateSuccessContractStatus}
+              onNavigate={handleNavigate}
+            />
+          )}
+
+          {/* PATH 6: MÓDULO 06 (LATE DEFAULTERS) */}
+          {currentPath === '/financeiro/modulo-06-contratos-inadimplentes' && (
+            <ModuloContratosInadimplentes 
+              transactions={transactions}
+              agreements={agreements}
+              onUpdateStatus={handleUpdateTransactionStatus}
               onLogAction={addTimelineLog}
             />
-          ) : (
-            <>
-              {/* Welcome Dashboard Banner banner */}
-              <div className="p-4 bg-white text-slate-800 rounded border border-gray-200 shadow-sm relative overflow-hidden font-sans">
-                <div className="absolute right-0 top-0 bottom-0 p-8 opacity-5 flex items-center">
-                  <Building2 className="w-32 h-32 text-slate-800" />
-                </div>
-                <div className="relative z-10">
-                  <h2 className="text-sm font-bold text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
-                    <span className="w-2 h-2 rounded-full bg-blue-500"></span> Console de Controladoria Operacional de Êxito
-                  </h2>
-                  <p className="text-xs text-slate-600 max-w-2xl mt-1 leading-normal">
-                    Este console de controladoria possibilita auditar receitas advocatícias, contratos de êxito judicial, planos de amortização/acordos, sincronizar pendências com a Fila Nibo, e auditar conformidade de conciliação diária de caixa. 
-                    Utilizando uma visualização compacta, com espaçamento denso e visualização de alta densidade de dados.
-                  </p>
-                  
-                  {/* Giffoni BOSS Contract Admittance CTA */}
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <button 
-                      onClick={() => { setView('cadastro-contrato'); setActiveSection('giffoni-cadastro'); }}
-                      className="flex items-center gap-1.5 text-[10px] font-black px-3.5 py-2 bg-amber-500 hover:bg-amber-600 border border-amber-600 text-slate-950 rounded transition-all duration-150 uppercase tracking-wider shadow-xs animate-pulse font-bold"
-                    >
-                      <Plus className="w-3.5 h-3.5 text-slate-950" /> Novo Cadastro Contrato Financeiro (Giffoni BOSS)
-                    </button>
-                    <button 
-                      onClick={() => { setActiveSection('contratos'); scrollToSection('section-contratos'); }}
-                      className="flex items-center gap-1 text-[10px] font-bold px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-250 text-slate-700 rounded transition-colors uppercase tracking-wider font-bold"
-                    >
-                      Consultar Carteira Ativa
-                    </button>
-                  </div>
-                </div>
-              </div>
+          )}
 
-              {/* MODULE 1: Resumo do Mês */}
-              <MonthlySummary transactions={transactions} />
-
-          {/* MODULE 2: Alertas Críticos */}
-          <CriticalAlerts 
-            alerts={alerts} 
-            onDismiss={handleDismissAlert} 
-            onResolveAlert={handleResolveAlert}
-          />
-
-          {/* Two-Column split for Receivables breakdown and Connection Queue */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            {/* MODULE 3: Recebíveis por Categoria */}
-            <ReceivablesByCategory transactions={transactions} />
-
-            {/* MODULE 4: Fila NIBO */}
-            <NiboQueue 
-              queue={niboQueue} 
-              onSyncItem={handleSyncNiboItem} 
+          {/* PATH 7: MÓDULO 07 (NIBO BACK SYSTEM) */}
+          {currentPath === '/financeiro/modulo-07-nibo' && (
+            <ModuloNibo 
+              niboQueue={niboQueue}
+              onSyncItem={handleSyncNiboItem}
               onSyncAll={handleSyncNiboAll}
               onResetToken={handleResetNiboToken}
             />
-          </div>
+          )}
 
-          {/* MODULE 5: Tabela Financeira Geral */}
-          <GeneralLedger 
-            transactions={transactions} 
-            onAddTransaction={handleAddTransaction}
-            onUpdateStatus={handleUpdateTransactionStatus}
-            onSyncTransaction={handleSyncTransactionToNibo}
-          />
+          {/* PATH 8: MÓDULO 08 (AGREEMENTS LIST) */}
+          {currentPath === '/financeiro/modulo-08-acordos-ativos' && (
+            <ModuloAcordosAtivos 
+              agreements={agreements}
+              onAmortizeAgreement={handlePayInstallment}
+              onNavigate={handleNavigate}
+            />
+          )}
 
-          {/* MODULE 6: Contratos de Êxito */}
-          <SuccessContracts 
-            contracts={successContracts}
-            onAddContract={handleAddSuccessContract}
-            onUpdateStatus={handleUpdateSuccessContractStatus}
-          />
+          {/* PATH 9: MÓDULO 09 (AD EXITUM CONTRACTS) */}
+          {currentPath === '/financeiro/modulo-09-contratos-exito' && (
+            <ModuloContratosExito 
+              successContracts={successContracts}
+              onAddContract={handleAddSuccessContract}
+            />
+          )}
 
-          {/* MODULE 7: Acordos e Parcelamentos */}
-          <AgreementsInstallments 
-            agreements={agreements}
-            onAddAgreement={handleAddAgreement}
-            onPayInstallment={handlePayInstallment}
-          />
+          {/* PATH 10: MÓDULO 10 (CONTRACT REGISTRATION FORM MULTIFLUX) */}
+          {currentPath === '/financeiro/modulo-10-cadastro-contrato' && (
+            <ContractRegistration 
+              onBackToDashboard={() => {
+                handleNavigate('/financeiro');
+              }}
+              onLogAction={addTimelineLog}
+              onAddContract={handleAddSuccessContract}
+              onAddAgreement={handleAddAgreement}
+            />
+          )}
 
-          {/* MODULE 8: Relatórios e Exportações */}
-          <ReportsExports 
-            transactions={transactions}
-            onLogAction={addTimelineLog}
-          />
+          {/* PATH 11: MÓDULO 11 (CONFIGURAÇÕES DO SETOR FINANCEIRO — GIFFONI BOSS) */}
+          {currentPath === '/financeiro/configuracoes' && (
+            <ModuloConfiguracoes 
+              onLogAction={addTimelineLog}
+              logs={logs}
+              onAddManualLog={(note) => addTimelineLog(`[ANOTAÇÃO MANUAL] ${note}`, 'warning')}
+              onClearLogs={handleClearLogs}
+            />
+          )}
 
-          {/* MODULE 9: Logs de Conferência */}
-          <ConferenceLogs 
-            logs={logs}
-            onAddManualLog={(note) => addTimelineLog(`[OPERATIONAL NOTE MANUAL] ${note}`, 'warning')}
-            onClearLogs={handleClearLogs}
-          />
-
-        </>
-      )}
-    </main>
-
+        </main>
       </div>
 
       {/* Corporate footer */}
       <footer className="bg-[#1E293B] text-slate-400 py-4 border-t border-slate-700 text-center text-[10px]">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-          <p>© 2026 Dashboard Financeiro Integrado. Operado por <strong>direito.rgr@gmail.com</strong></p>
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2.5 font-sans">
+          <p>© 2026 Giffoni BOSS • Módulos Compartimentados Decentralizados • Operador: <strong>direito.rgr@gmail.com</strong></p>
           <div className="flex gap-2">
-            <span className="px-2 py-0.5 bg-slate-800 text-slate-300 rounded border border-slate-700 font-mono">Terminal ID: F-1024</span>
-            <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded border border-blue-500/30 font-bold uppercase">Live Data</span>
+            <span className="px-2 py-0.5 bg-slate-800 text-slate-350 rounded border border-slate-700 font-mono">PÁGINA ATALHO: {currentPath}</span>
+            <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded border border-blue-500/30 font-bold uppercase font-sans">Live SSL Link</span>
           </div>
         </div>
       </footer>

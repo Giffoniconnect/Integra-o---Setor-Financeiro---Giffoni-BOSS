@@ -106,7 +106,7 @@ export default function MonthlySummary({ transactions }: MonthlySummaryProps) {
       </div>
 
       {/* Grid containing monetary card totals */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 mt-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 mt-4">
         {/* Revenue Card */}
         <div className="bg-white p-3 rounded shadow-sm border border-gray-200 border-l-4 border-blue-500 relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-4 opacity-[0.02] group-hover:scale-110 transition-transform">
@@ -144,29 +144,6 @@ export default function MonthlySummary({ transactions }: MonthlySummaryProps) {
               <span className="text-rose-600 font-semibold font-mono">Pago: {formatBRL(expensePaid)}</span>
               <span className="text-slate-400 font-mono">Provisões: {formatBRL(expensePending)}</span>
             </div>
-          </div>
-        </div>
-
-        {/* Net Cashflow (Saldo) Card */}
-        <div className={`bg-white p-3 rounded shadow-sm border border-gray-200 border-l-4 relative overflow-hidden group ${
-          netPaidProfit >= 0 ? 'border-emerald-500' : 'border-rose-500'
-        }`}>
-          <div className="absolute top-0 right-0 p-4 opacity-[0.02]">
-            <Wallet className="w-24 h-24 text-emerald-500" />
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Saldo de Caixa (Líquido)</span>
-            <div className={`p-1 rounded ${netPaidProfit >= 0 ? 'bg-emerald-55 text-emerald-500' : 'bg-red-55 text-red-500'}`}>
-              <DollarSign className="w-3.5 h-3.5" />
-            </div>
-          </div>
-          <div className="mt-1">
-            <h3 className={`text-lg font-bold font-mono tracking-tight ${netPaidProfit >= 0 ? 'text-slate-900' : 'text-rose-700'}`}>
-              {formatBRL(netPaidProfit)}
-            </h3>
-            <p className="text-[10px] text-slate-400 mt-1 font-mono">
-              Se provisionado recebido: <strong className="font-mono text-slate-600">{formatBRL(netEstimatedProfit)}</strong>
-            </p>
           </div>
         </div>
       </div>
